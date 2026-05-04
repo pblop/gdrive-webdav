@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  gdrive-webdav:
+    image: ghcr.io/pblop/gdrive-webdav:master
+    container_name: gdrive-webdav
+    restart: unless-stopped
+    ports:
+      - "8765:8765"
+    volumes:
+      # Mounts the token file to persist authentication between restarts.
+      # Ensure you run `touch .gdrive_token` in the same directory before starting.
+      - ./.gdrive_token:/root/.gdrive_token
+    command:
+      - "--client-id=${GDRIVE_CLIENT_ID}"
+      - "--client-secret=${GDRIVE_CLIENT_SECRET}"
+      # Uncomment and configure the line below if you want to mount a specific folder instead of root
+      # - "--root-folder=/zotero-library"
