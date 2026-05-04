@@ -15,8 +15,10 @@ import (
 )
 
 type fileSystem struct {
-	client *drive.Service
-	cache  *gocache.Cache
+	client     *drive.Service
+	cache      *gocache.Cache
+	rootFolder string
+	rootFile   *drive.File
 }
 
 func (fs *fileSystem) Mkdir(_ context.Context, name string, perm os.FileMode) error {
@@ -164,11 +166,62 @@ func (fs *fileSystem) getFileID(p string, onlyFolder bool) (string, error) {
 	return f.file.Id, nil
 }
 
+func (fs *fileSystem) ensureDrivePath(p string) (*fileAndPath, error) {
+	p = normalizePath(p)
+	if p == "" {
+		f := &drive.File{
+			Id:       "root",
+			Name:     "/",
+			MimeType: mimeTypeFolder,
+		}
+		return &fileAndPath{file: f, path: "/"}, nil
+	}
+
+	parent := path.Dir(p)
+	base := path.Base(p)
+
+	parentFP, err := fs.ensureDrivePath(parent)
+	if err != nil {
+		return nil, err
+	}
+
+	q := fs.client.Files.List()
+	query := fmt.Sprintf("'%s' in parents and name='%s' and mimeType='%s'", parentFP.file.Id, strings.ReplaceAll(base, "'", "\\'"), mimeTypeFolder)
+	q.Q(query)
+	q.Fields("files(id, name, appProperties, mimeType, size, modifiedTime, createdTime)")
+	r, err := q.Do()
+	if err != nil {
+		return nil, err
+	}
+	for _, file := range r.Files {
+		if ignoreFile(file) {
+			continue
+		}
+		return &fileAndPath{file: file, path: p}, nil
+	}
+
+	log.Infof("Creating missing folder %s in Google Drive", p)
+	f := &drive.File{
+		MimeType: mimeTypeFolder,
+		Name:     base,
+		Parents:  []string{parentFP.file.Id},
+	}
+	createdFile, err := fs.client.Files.Create(f).Do()
+	if err != nil {
+		return nil, err
+	}
+
+	return &fileAndPath{file: createdFile, path: p}, nil
+}
+
 func (fs *fileSystem) getFile0(p string, onlyFolder bool) (*fileAndPath, error) {
 	log.Tracef("getFile0 %v %v", p, onlyFolder)
 	p = normalizePath(p)
 
 	if p == "" {
+		if fs.rootFolder != "" {
+			return &fileAndPath{file: fs.rootFile, path: "/"}, nil
+		}
 		f := &drive.File{
 			Id:       "root",
 			Name:     "/",
@@ -187,7 +240,7 @@ func (fs *fileSystem) getFile0(p string, onlyFolder bool) (*fileAndPath, error) 
 	}
 
 	q := fs.client.Files.List()
-	query := fmt.Sprintf("'%s' in parents and name='%s'", parentID, base)
+	query := fmt.Sprintf("'%s' in parents and name='%s'", parentID, strings.ReplaceAll(base, "'", "\\'"))
 	if onlyFolder {
 		query += " and mimeType='" + mimeTypeFolder + "'"
 	}

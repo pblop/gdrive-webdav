@@ -18,6 +18,7 @@ var (
 	addr         = flag.String("addr", ":8765", "WebDAV service address")
 	clientID     = flag.String("client-id", "", "OAuth client id")
 	clientSecret = flag.String("client-secret", "", "OAuth client secret")
+	rootFolder   = flag.String("root-folder", "", "Root folder in Google Drive (e.g. /zotero-library)")
 	debug        = flag.Bool("debug", false, "print debug info")
 	trace        = flag.Bool("trace", false, "print trace info")
 )
@@ -44,7 +45,7 @@ func main() {
 	}
 
 	handler := &webdav.Handler{
-		FileSystem: gdrive.NewFS(context.Background(), *clientID, *clientSecret),
+		FileSystem: gdrive.NewFS(context.Background(), *clientID, *clientSecret, *rootFolder),
 		LockSystem: gdrive.NewLS(),
 		Logger: func(req *http.Request, err error) {
 			log.Tracef("%+v", req)

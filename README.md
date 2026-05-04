@@ -35,6 +35,7 @@ authenticate again.
 Supported flags:
 
 * `--addr` service address, `:8765` by default
+* `--root-folder` the target directory in Google Drive to be mounted as root, empty by default (e.g., `/zotero-library`)
 * `--debug`, `--trace` print more information
 
 ## Status

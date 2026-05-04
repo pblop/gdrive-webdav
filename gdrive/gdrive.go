@@ -22,7 +22,7 @@ type fileAndPath struct {
 }
 
 // NewFS creates new gdrive file system.
-func NewFS(ctx context.Context, clientID string, clientSecret string) webdav.FileSystem {
+func NewFS(ctx context.Context, clientID string, clientSecret string, rootFolder string) webdav.FileSystem {
 	httpClient := newHTTPClient(ctx, clientID, clientSecret)
 	client, err := drive.NewService(ctx, option.WithHTTPClient(httpClient))
 	if err != nil {
@@ -30,10 +30,25 @@ func NewFS(ctx context.Context, clientID string, clientSecret string) webdav.Fil
 		panic(-3)
 	}
 
-	fs := &fileSystem{
-		client: client,
-		cache:  gocache.New(5*time.Minute, 30*time.Second),
+	if rootFolder != "" && !strings.HasPrefix(rootFolder, "/") {
+		rootFolder = "/" + rootFolder
 	}
+	rootFolder = normalizePath(rootFolder)
+
+	fs := &fileSystem{
+		client:     client,
+		cache:      gocache.New(5*time.Minute, 30*time.Second),
+		rootFolder: rootFolder,
+	}
+
+	if rootFolder != "" {
+		fp, err := fs.ensureDrivePath(rootFolder)
+		if err != nil {
+			log.Fatalf("Could not access or create root folder %v: %v", rootFolder, err)
+		}
+		fs.rootFile = fp.file
+	}
+
 	return fs
 }
 
