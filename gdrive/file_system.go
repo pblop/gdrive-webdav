@@ -169,10 +169,10 @@ func (fs *fileSystem) getFile0(p string, onlyFolder bool) (*fileAndPath, error) 
 	p = normalizePath(p)
 
 	if p == "" {
-		f, err := fs.client.Files.Get("root").Do()
-		if err != nil {
-			log.Error(err)
-			return nil, err
+		f := &drive.File{
+			Id:       "root",
+			Name:     "/",
+			MimeType: mimeTypeFolder,
 		}
 		return &fileAndPath{file: f, path: "/"}, nil
 	}
