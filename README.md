@@ -1,27 +1,36 @@
 # gdrive-webdav
 
-![Go Workflow](https://github.com/mikea/gdrive-webdav/workflows/Go/badge.svg)
+![Go Workflow](https://github.com/pblop/gdrive-webdav/workflows/Go/badge.svg)
 
 Simple Google Drive => WebDAV bridge.
 
 ## Usage
 
 * Build docker image: `docker build -t gdrive-webdav .`
-* Create a project and enable "Google Drive API" (https://developers.google.com/workspace/guides/create-project)
-* Configure OAuth consent screen (https://developers.google.com/workspace/guides/configure-oauth-consent), add ".../auth/drive.file" scope, add yourself to "Test Users".
-* Obtain OAuth client ID credentials for *Desktop* Application (https://developers.google.com/workspace/guides/create-credentials#oauth-client-id)
+* Create a project and enable "Google Drive API"
+  (https://developers.google.com/workspace/guides/create-project)
+* Configure OAuth consent screen
+  (https://developers.google.com/workspace/guides/configure-oauth-consent), add
+  ".../auth/drive.file" scope, add yourself to "Test Users".
+* Obtain OAuth client ID credentials for *Desktop* Application
+  (https://developers.google.com/workspace/guides/create-credentials#oauth-client-id)
 * Run using docker:
 
   ```bash
   touch .gdrive_token
-  docker run -ti --rm -p 8765:8765 -v $(pwd)/.gdrive_token:/root/.gdrive_token ghcr.io/mikea/gdrive-webdav:master --client-id=<client_id> --client-secret=<client_secret>
+  docker run -ti --rm -p 8765:8765 -v $(pwd)/.gdrive_token:/root/.gdrive_token ghcr.io/pblop/gdrive-webdav:master --client-id=<client_id> --client-secret=<client_secret>
   ```
 
 * Connect to WebDAV network drive using http://localhost:8765/
 
-The program uses the `https://www.googleapis.com/auth/drive.file` scope. Google Drive limits this scope to files and folders created by this app, or files that are explicitly opened/shared with this app. Existing Drive files outside that set will not be visible through WebDAV.
+The program uses the `https://www.googleapis.com/auth/drive.file` scope. Google
+Drive limits this scope to files and folders created by this app, or files that
+are explicitly opened/shared with this app. Existing Drive files outside that
+set will not be visible through WebDAV.
 
-If you previously authenticated with a broader scope, delete your token cache file (`~/.gdrive_token` by default, or the file passed with `--token-file`) and authenticate again.
+If you previously authenticated with a broader scope, delete your token cache
+file (`~/.gdrive_token` by default, or the file passed with `--token-file`) and
+authenticate again.
 
 Supported flags:
 
@@ -36,8 +45,10 @@ Alpha quality. I trust it my files.
 * Linux davfs2: Some issues
 * Mac Finder: Read-only
 * Cyberduck: Appears to work (works also with Win8)
-* Win8: Cannot connect to http://localhost:8765/ , using WIN8 network share builtin webdav support
-  * Win8 MiniRedirector Client does not seem to send correct PROPFIND. Missing xml on request body 0 length.
+* Win8: Cannot connect to http://localhost:8765/ , using WIN8 network share
+  builtin webdav support
+  * Win8 MiniRedirector Client does not seem to send correct PROPFIND. Missing
+    xml on request body 0 length.
 
 [Litmus](http://webdav.org/neon/litmus/) test results as of Aug 2022:
 
