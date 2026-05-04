@@ -208,7 +208,7 @@ func (fs *fileSystem) getFile0(p string, onlyFolder bool) (*fileAndPath, error) 
 		return &fileAndPath{file: file, path: p}, nil
 	}
 
-	log.Errorf("Can't file file %v", p)
+	log.Debugf("Can't find file %v", p)
 	return nil, os.ErrNotExist
 }
 

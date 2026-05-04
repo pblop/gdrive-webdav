@@ -74,7 +74,7 @@ func (f *openWritableFile) Close() error {
 	}
 
 	if parentID == "" {
-		log.Errorf("Can't file file %v", f.name)
+		log.Errorf("Can't find parent for file %v", f.name)
 		return os.ErrNotExist
 	}
 
