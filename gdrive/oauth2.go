@@ -19,7 +19,7 @@ var (
 
 func newHTTPClient(ctx context.Context, clientID string, clientSecret string) *http.Client {
 	config := &oauth2.Config{
-		Scopes:      []string{"https://www.googleapis.com/auth/drive"},
+		Scopes:      []string{"https://www.googleapis.com/auth/drive.file"},
 		RedirectURL: "urn:ietf:wg:oauth:2.0:oob",
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  "https://accounts.google.com/o/oauth2/auth",

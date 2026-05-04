@@ -8,7 +8,7 @@ Simple Google Drive => WebDAV bridge.
 
 * Build docker image: `docker build -t gdrive-webdav .`
 * Create a project and enable "Google Drive API" (https://developers.google.com/workspace/guides/create-project)
-* Configure OAuth consent screen (https://developers.google.com/workspace/guides/configure-oauth-consent), add ".../auth/drive" scope, add yourself to "Test Users".
+* Configure OAuth consent screen (https://developers.google.com/workspace/guides/configure-oauth-consent), add ".../auth/drive.file" scope, add yourself to "Test Users".
 * Obtain OAuth client ID credentials for *Desktop* Application (https://developers.google.com/workspace/guides/create-credentials#oauth-client-id)
 * Run using docker:
 
@@ -18,6 +18,10 @@ Simple Google Drive => WebDAV bridge.
   ```
 
 * Connect to WebDAV network drive using http://localhost:8765/
+
+The program uses the `https://www.googleapis.com/auth/drive.file` scope. Google Drive limits this scope to files and folders created by this app, or files that are explicitly opened/shared with this app. Existing Drive files outside that set will not be visible through WebDAV.
+
+If you previously authenticated with a broader scope, delete your token cache file (`~/.gdrive_token` by default, or the file passed with `--token-file`) and authenticate again.
 
 Supported flags:
 
